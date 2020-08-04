@@ -2,15 +2,10 @@ package main
 
 import (
 	"fmt"
+	"log"
 )
 
-func main() {
-	fmt.Println("go-backup started")
-	defer fmt.Println("all done")
-	cfg := GetCfg("go-backup.cfg")
-	fmt.Printf("%#v\n", cfg)
-	cache := OpenCache(cfg.Cache)
-	defer cache.Close()
+func t1(cache *Cache){
 	// testing
 	fd, err := cache.Retrieve("/xxxx")
 	if err != nil {
@@ -24,4 +19,31 @@ func main() {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
+}
+
+func setup(cfg *CFG,cache *Cache){
+	wgStarting.Add(1)
+	debugSinkChan=CreateFileWorkChan()
+	go DebugSink()
+	wgStarting.Add(1)
+	fromCacheChan=CreateFileWorkChan()
+	go FromCache()
+	for i:=range cfg.Include {
+		wgStarting.Add(1)
+		go discover(i,cfg)
+	}
+}
+
+func main() {
+	log.SetFlags(log.LstdFlags|log.Lshortfile)
+	log.Print("go-backup started")
+	defer log.Print("all done")
+	cfg := GetCfg("go-backup.cfg")
+	fmt.Printf("%#v\n", cfg)
+	cache := OpenCache(cfg.Cache)
+	defer cache.Close()
+	wgStarting.Add(1)
+	setup(cfg,cache)
+	wgStarting.Done()
+	Wait4Channels()
 }
