@@ -1,19 +1,26 @@
+
 package main
 
+/*
+ * It is a receiver channel goroutine for debugging
+ */
+ 
 import (
-  "fmt"
   "log"
 )
 
-var debugSinkChan *FileWorkChan
+/*
+ a sink that prints out the received values
+*/
+var debugSinkChan chan(*FileWork)=make(chan *FileWork,chanLength)
 
-func DebugSink(){
-  // only a receiver
-  wgStarting.Done()
-  wgStarting.Wait()
+func debugSink(){
+  running.Add(1)
+  defer running.Done()
   // setup done
-  defer log.Print("DebugSink ended")
-  for fw:=range debugSinkChan.ch {
-    fmt.Printf("%#v\n",fw)
+  defer log.Println("debugSink: done")
+  log.Println("debugSink: started")
+  for fw:=range debugSinkChan {
+    log.Printf("%#v\n",fw)
   }
 }

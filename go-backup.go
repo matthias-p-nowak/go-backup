@@ -1,49 +1,70 @@
+/*
+Backup program that stores files in bzip2 form under filenames made from the hash sum of the content.
+Configuration is read from go-backup.cfg. 
+*/
 package main
 
+/*
+ * TODO: implement a help 
+ * TODO: implement command line flags
+ */
+
 import (
-	"fmt"
 	"log"
+	"runtime"
+	"sync"
 )
 
-func t1(cache *Cache){
-	// testing
-	fd, err := cache.Retrieve("/xxxx")
-	if err != nil {
-		fmt.Printf("err is %#v\n", err)
-	}
-	fmt.Printf("fd is %#v\n", fd)
-	fd.MTime = 4711
-	fd.Size = 42
-	fd.Hash = []byte{7, 4, 3, 44, 55, 77}
-	err = cache.Store("/xxxx", fd)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-}
+const (
+	chanLength int =16
+)
 
+// the wait group all goroutines should take part
+var running sync.WaitGroup
+
+// dedicated function to set up the infrastructure
 func setup(cfg *CFG,cache *Cache){
-	wgStarting.Add(1)
-	debugSinkChan=CreateFileWorkChan()
-	go DebugSink()
-	wgStarting.Add(1)
-	fromCacheChan=CreateFileWorkChan()
-	go FromCache()
+	workers:=cfg.NumWorkers
+	if workers < 1 {
+		workers=1
+	}
+	// worker that walk the files trees and send info out
 	for i:=range cfg.Include {
-		wgStarting.Add(1)
 		go discover(i,cfg)
 	}
+	// worker that retrieves from cache
+	go fromCache(cache)
+	for i:=0; i< workers;i++{
+		go calcHash()
+		go checkTarget(cfg)
+		go bzip2Writer(cfg)
+	}
+	// TODO: calculate hash sum
+	// TODO: check if target file exists
+	// TODO: bzip2 workers - like 114.go
+	// TODO: script writer
+	go scriptWriter(cfg)
+	// TODO: cache writer
+	// temp channel to print out the structures
+	go debugSink()
 }
 
+// Back up files
 func main() {
+	// setting logs
 	log.SetFlags(log.LstdFlags|log.Lshortfile)
+	//
 	log.Print("go-backup started")
 	defer log.Print("all done")
+	// configuration
 	cfg := GetCfg("go-backup.cfg")
-	fmt.Printf("%#v\n", cfg)
+	// open the bolt based cache
 	cache := OpenCache(cfg.Cache)
 	defer cache.Close()
-	wgStarting.Add(1)
+	// do a setup
 	setup(cfg,cache)
-	wgStarting.Done()
-	Wait4Channels()
+	// goroutines are created, but need to be running
+	runtime.Gosched()
+	// running waits until all goroutines are finished
+	running.Wait()
 }
