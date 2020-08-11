@@ -22,6 +22,7 @@ type CFG struct {
   Cache string `yaml:"cache"`
   // only take backup of files younger than this
   MinAge string `yaml:"minage"`
+  MaxErrors int `yaml:"maxerrors"`
   NumWorkers int  `yaml:"workers"`
   // walk all files that are on this device starting with this path
   Include []string `yaml:"include"`
@@ -36,6 +37,7 @@ type CFG struct {
 func GetCfg(filename string) (cfg *CFG) {
   cfg = new(CFG)
   cfg.NumWorkers = 1
+  cfg.MaxErrors = 1024
   // file is small enough
   data, err := ioutil.ReadFile(filename)
   if err != nil {

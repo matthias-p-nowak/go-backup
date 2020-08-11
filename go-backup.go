@@ -7,6 +7,8 @@ package main
 /*
  * TODO: implement a help 
  * TODO: implement command line flags
+ * TODO: syslog
+ * TODO: email when errors
  */
 
 import (
@@ -44,6 +46,7 @@ func setup(cfg *CFG,cache *Cache){
 	// TODO: bzip2 workers - like 114.go
 	// TODO: script writer
 	go scriptWriter(cfg)
+	go errorWork(cfg)
 	// TODO: cache writer
 	// temp channel to print out the structures
 	go debugSink()

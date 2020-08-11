@@ -14,6 +14,7 @@ import (
 func discover(f int, cfg *CFG){
   running.Add(1)
   defer running.Done()
+  // channel
   chancloser.Claim(fromCacheChan)
   defer chancloser.Release(fromCacheChan)
   chancloser.Claim(scriptWriterChan)
@@ -25,6 +26,7 @@ func discover(f int, cfg *CFG){
   path2walk:=cfg.Include[f]
   defer log.Println("discover: done",path2walk)
   log.Println("discover: walking ",path2walk)
+  // 
   // which device is path2walk on?
   st,err:=os.Lstat(path2walk)
   if err != nil {
@@ -39,9 +41,12 @@ func discover(f int, cfg *CFG){
     // log.Print("looking at ",p)
     // check if this directory should not be backed up
     if info.IsDir(){
+      // test if directory shouldn't be backed up
+      // TODO: should this .nobackup file be backed up?
       p2:=path.Join(fpath,".nobackup")
       _,e:=os.Lstat(p2)
       if e == nil {
+        // file exists
         log.Print("not backing up dir ",fpath)
         // cutting off subtree
         return filepath.SkipDir
@@ -59,11 +64,13 @@ func discover(f int, cfg *CFG){
         return nil
       }
     }
+    // same device
     // does the file match an exclusion pattern?
     b:=path.Base(fpath)
     for _,ex:=range cfg.Exclude {
       m,e:=path.Match(ex,b)
       if e!=nil {
+        // indicates a bigger problem therefore Fatal
         log.Fatal(e)
       }
       if m {

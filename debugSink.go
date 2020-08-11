@@ -3,6 +3,7 @@ package main
 
 /*
  * It is a receiver channel goroutine for debugging
+ * TODO: remove
  */
  
 import (
@@ -21,6 +22,7 @@ func debugSink(){
   defer log.Println("debugSink: done")
   log.Println("debugSink: started")
   for fw:=range debugSinkChan {
-    log.Printf("%#v\n",fw)
+    // log.Printf("%#v\n",fw)
+    _=fw
   }
 }
