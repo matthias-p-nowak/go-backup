@@ -22,10 +22,10 @@ func toCache(cache *Cache){
     fd.MTime=entry.MTime
     fd.Size=entry.Size
     fd.Hash=entry.Hash
-    log.Println("storing "+entry.Path)
-    //err:=cache.Store(entry.Path,fd)
-    //if err!=nil {
-      //log.Fatal(err)
-    //}
+    // log.Println("storing "+entry.Path)
+    err:=cache.Store(entry.Path,fd)
+    if err!=nil {
+      log.Fatal(err)
+    }
   }
 } 

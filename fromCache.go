@@ -3,6 +3,7 @@ package main
 import (
   "log"
   "github.com/matthias-p-nowak/chancloser"
+  "github.com/syndtr/goleveldb/leveldb"
 )
 
 // the input channel for the check on cached information
@@ -30,7 +31,7 @@ func fromCache(cache *Cache){
     }
     // avoid hash calculation if we know it from before
     fd,err:=cache.Retrieve(entry.Path)
-    doHash := err == cacheEmpty // don't know
+    doHash := err == leveldb.ErrNotFound // don't know
     if (err != nil) && ! doHash {
       // there was an error, but not an empty cache
       entry.record("Cache error:"+err.Error())
