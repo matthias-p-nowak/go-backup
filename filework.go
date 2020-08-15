@@ -18,12 +18,6 @@ type FileWork struct {
   MTime int64
   // File size
   Size int64
-  // user id
-  Uid int
-  // group id
-  Gid int
-  // file mode
-  Mode string
   // info from the filewalk
   FileInfo os.FileInfo
   workDone []string

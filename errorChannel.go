@@ -6,7 +6,7 @@ import(
 
 
 // the input channel for the script writer
-var errorWorkChan chan *FileWork=make(chan *FileWork,chanLength)
+var errorWorkChan=make(chan *FileWork,chanLength)
 
 type Err struct{
   path string

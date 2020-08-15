@@ -39,6 +39,7 @@ func discover(f int, cfg *CFG){
   // the work is done by this function
   fwf:=func(fpath string, info os.FileInfo, err error) (error){
     // log.Print("looking at ",p)
+    <-workTickets
     // check if this directory should not be backed up
     if info.IsDir(){
       // test if directory shouldn't be backed up
@@ -95,7 +96,11 @@ func discover(f int, cfg *CFG){
     entry.Size=info.Size()      
     entry.record("walked "+path2walk)
     if info.Mode().IsRegular(){
-      fromCacheChan <- entry            
+      if entry.Size > 0 {
+        fromCacheChan <- entry            
+      } else {
+        scriptWriterChan <- entry
+      }
     } else{
       scriptWriterChan <- entry      
     }

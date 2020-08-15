@@ -11,7 +11,7 @@ import(
 
 
 // the input channel for the script writer
-var bzip2WriterChan chan *FileWork=make(chan *FileWork,chanLength)
+var bzip2WriterChan=make(chan *FileWork,chanLength)
 
 // defer only works inside a function, therefore a function for calling the bzip2 program
 func runBzip2(entry *FileWork, dest string)(succ bool){
@@ -54,6 +54,7 @@ func bzip2Writer(cfg *CFG) {
   log.Println("bzip2Writer: working")
   // setup done
   for entry:= range bzip2WriterChan{
+    <- workTickets
     // work
     dest:=path.Join(cfg.Destination,"f",entry.Hash)
     if runBzip2(entry,dest) {

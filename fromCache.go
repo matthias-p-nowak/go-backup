@@ -6,7 +6,7 @@ import (
 )
 
 // the input channel for the check on cached information
-var fromCacheChan chan *FileWork=make(chan *FileWork,chanLength)
+var fromCacheChan=make(chan *FileWork,chanLength)
 
 // worker that checks if we have cached information about this file
 func fromCache(cache *Cache){
@@ -23,6 +23,7 @@ func fromCache(cache *Cache){
   // setup done
   // #############################################
   for entry:=range fromCacheChan {
+    <-workTickets
     if entry.Size <= 0 {
       // should be bigger than 0 - if wrong, this is a programming error
       log.Fatal("wrong programming assumption, size <0:",entry)

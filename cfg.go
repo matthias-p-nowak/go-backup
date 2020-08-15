@@ -23,6 +23,7 @@ type CFG struct {
   // only take backup of files younger than this
   MinAge string `yaml:"minage"`
   MaxErrors int `yaml:"maxerrors"`
+  MaxLoad  float64 `yaml:"maxload"`
   NumWorkers int  `yaml:"workers"`
   // walk all files that are on this device starting with this path
   Include []string `yaml:"include"`

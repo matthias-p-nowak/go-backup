@@ -47,9 +47,10 @@ func setup(cfg *CFG,cache *Cache){
 	// TODO: script writer
 	go scriptWriter(cfg)
 	go errorWork(cfg)
+	go toCache(cache)
 	// TODO: cache writer
 	// temp channel to print out the structures
-	go debugSink()
+	// go debugSink()
 }
 
 // Back up files

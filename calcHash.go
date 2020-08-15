@@ -54,6 +54,7 @@ func calcHash() {
   defer log.Println("calcHash: done")
   // setup done
   for entry:= range calcHashChan{
+    <-workTickets
     h,err:=calcFromFile(entry.Path)
     if err != nil {
       // sending to error channel
