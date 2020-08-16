@@ -24,8 +24,7 @@ func discover(f int, cfg *CFG){
   cutOff:=cfg.AgeCutoff()
   // can start doing work now
   path2walk:=cfg.Include[f]
-  defer log.Println("discover: done",path2walk)
-  log.Println("discover: walking ",path2walk)
+  log.Println("walking ",path2walk)
   // 
   // which device is path2walk on?
   st,err:=os.Lstat(path2walk)
@@ -36,10 +35,12 @@ func discover(f int, cfg *CFG){
   ss:=s.(*syscall.Stat_t)
   // storing the device number
   dev:=ss.Dev
+  worked:=0
   // the work is done by this function
   fwf:=func(fpath string, info os.FileInfo, err error) (error){
     // log.Print("looking at ",p)
     <-workTickets
+    worked++
     // check if this directory should not be backed up
     if info.IsDir(){
       // test if directory shouldn't be backed up
@@ -107,7 +108,7 @@ func discover(f int, cfg *CFG){
     return nil
   }
   // commence the work
-  log.Print("walking ",path2walk)
+  // log.Print("walking ",path2walk)
   filepath.Walk(path2walk,fwf)
-  log.Print("walked ",path2walk)
+  log.Printf(" %s found: %d\n",path2walk,worked)
 }

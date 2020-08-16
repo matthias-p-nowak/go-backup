@@ -35,7 +35,24 @@ func runBzip2(entry *FileWork, dest string)(succ bool){
     // now bzip2
     cmd:=exec.Command("bzip2","-c",entry.Path)
     cmd.Stdout=f
-    cmd.Run()
+    err=cmd.Run()
+    if err != nil {
+      entry.record("executing bzip2 failed")
+      return false
+    }
+    stat,err := os.Lstat(entry.Path)
+    if err != nil {
+      entry.record("can't get lstat info")
+      return false
+    }
+    if stat.ModTime().Unix() != entry.MTime {
+      entry.record("file time changed during bzip2")
+      return false
+    }
+    if stat.Size() != entry.Size {
+      entry.record("size changed during bzip2")
+      return false
+    }
     return true
 }
 
@@ -50,16 +67,21 @@ func bzip2Writer(cfg *CFG) {
   chancloser.Claim(errorWorkChan)
   defer chancloser.Release(errorWorkChan)
   // 
-  defer log.Println("bzip2Writer: done")
-  log.Println("bzip2Writer: working")
+  // log.Println(" working")
   // setup done
+  worked:=0
   for entry:= range bzip2WriterChan{
     <- workTickets
+    worked++
     // work
     dest:=path.Join(cfg.Destination,"f",entry.Hash)
     if runBzip2(entry,dest) {
       entry.record("wrote bzip2")
       scriptWriterChan <- entry
+    } else {
+      entry.record("storing failed")
+      errorWorkChan <- entry
     }
   }
+  log.Printf("done: %d\n",worked)
 }

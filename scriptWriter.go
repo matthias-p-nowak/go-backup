@@ -30,8 +30,6 @@ func scriptWriter(cfg *CFG) {
   defer chancloser.Release(errorWorkChan)
   chancloser.Claim(toCacheChan)
   defer chancloser.Release(toCacheChan)
-  defer log.Println("scriptWriter: done")
-  log.Println("scriptWriter: working")
   // setup done
   now:=time.Now()
   hostname,err:=os.Hostname()
@@ -103,4 +101,5 @@ DEST=${DEST:-/}
     }
   }
   script.WriteString(fmt.Sprintf("echo all done\nexit\n##### ##### #####\n%d\n",entryCnt))
+  log.Printf("done, entries: %d\n",entryCnt)
 }

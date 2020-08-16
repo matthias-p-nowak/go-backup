@@ -24,11 +24,11 @@ func checkTarget(cfg *CFG) {
   chancloser.Claim(scriptWriterChan)
   defer chancloser.Release(scriptWriterChan)
   //
-  defer log.Println("checkTarget: done")
-  log.Println("checkTarget: starting")
   // setup done
   dest:=cfg.Destination
+  worked:=0
   for entry:= range checkTargetChan{
+    worked++
     filepath:=path.Join(dest,"f",entry.Hash)
     _,err := os.Lstat(filepath)
     if os.IsNotExist(err){
@@ -47,4 +47,5 @@ func checkTarget(cfg *CFG) {
       scriptWriterChan <-entry
     }
   }
+  log.Printf("done: %d\n",worked)
 }

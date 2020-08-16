@@ -19,11 +19,13 @@ func fromCache(cache *Cache){
   defer chancloser.Release(checkTargetChan)
   chancloser.Claim(errorWorkChan)
   defer chancloser.Release(errorWorkChan)
-  defer log.Println("fromCache: done")
-  log.Println("fromCache: working")
   // setup done
   // #############################################
+  worked:=0
+  hits:=0
+  misses:=0
   for entry:=range fromCacheChan {
+    worked++
     <-workTickets
     if entry.Size <= 0 {
       // should be bigger than 0 - if wrong, this is a programming error
@@ -43,10 +45,14 @@ func fromCache(cache *Cache){
     doHash = doHash || fd.MTime != entry.MTime
       // TODO is it still the same file?
     if doHash {
+      misses++
       entry.record("do a hash calculation")
       calcHashChan <- entry
     } else {
+      hits++
+      entry.Hash=fd.Hash
       checkTargetChan <- entry
     }
   }
+  log.Printf("checked: %d missed: %d, hits: %d\n",worked,misses,hits)
 }

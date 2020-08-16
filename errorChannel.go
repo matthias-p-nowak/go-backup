@@ -19,9 +19,8 @@ var allErrors []Err
 func errorWork(cfg *CFG) {
   running.Add(1)
   defer running.Done()
-  defer log.Println("errorWork: done")
-  log.Println("errorWork: working")
   // setup done
+  worked:=0
   for entry:= range errorWorkChan{
     e:=new(Err)
     e.path=entry.Path
@@ -34,4 +33,5 @@ func errorWork(cfg *CFG) {
     }
     allErrors=append(allErrors,*e)
   }
+  log.Printf("error entries: %d\n",worked)
 }

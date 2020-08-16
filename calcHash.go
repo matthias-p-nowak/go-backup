@@ -50,10 +50,11 @@ func calcHash() {
   defer chancloser.Release(checkTargetChan)
   chancloser.Claim(errorWorkChan)
   defer chancloser.Release(errorWorkChan)
-  log.Println("calcHash: working")
-  defer log.Println("calcHash: done")
+  // log.Println(" working")
   // setup done
+  worked:=0
   for entry:= range calcHashChan{
+    worked++
     <-workTickets
     h,err:=calcFromFile(entry.Path)
     if err != nil {
@@ -66,4 +67,5 @@ func calcHash() {
     entry.Hash=h
     checkTargetChan <- entry
   }
+  log.Printf("done: %d\n",worked)
 }

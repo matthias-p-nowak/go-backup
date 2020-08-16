@@ -14,8 +14,8 @@ func example() {
   defer running.Done()
   // chancloser.Claim(debugSinkChan)
   // defer chancloser.Release(debugSinkChan)
-  defer log.Println("example: done")
-  log.Println("example: working")
+  defer log.Println("done")
+  log.Println("working")
   // setup done
   for entry:= range exampleChan{
     // debugSinkChan <- entry

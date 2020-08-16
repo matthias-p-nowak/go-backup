@@ -8,9 +8,15 @@ import (
 	"time"
 )
 
+/*
+Backup runs in addition to usual programs and should occupy the processor.
+/proc/stat shows the processor loads and this ensures that 1/8th of the processor is idle.
+ */
+
 var workTickets = make(chan int)
 
 func getFields() []string {
+	// there is no easier way than reading the pseudo file
 	content, err := ioutil.ReadFile("/proc/stat")
 	if err != nil {
 		log.Fatal(err)
@@ -20,12 +26,12 @@ func getFields() []string {
 }
 
 func checkLoad() {
-  log.Print("load check started")
-  defer log.Print("load check stopped")
+  log.Print("started")
 	ticks := time.Tick(100 * time.Millisecond)
 	var got [5]uint64
 	var sum uint64
 	var idle uint64
+	// /proc/stat increases counter, therefore we need the first value
   fields:=getFields()
 	for f := 0; f < 5; f++ {
 		v, err := strconv.ParseUint(fields[f+1], 10, 64)
@@ -34,13 +40,16 @@ func checkLoad() {
 		}
 		got[f] = v
 	}
+	// this function never ends to run
+	lastPrint:=0
 	for {
 		select {
 		case <-ticks:
 			for {
+				lastPrint++
 				fields = getFields()
-				sum -= sum >> 4
-				idle -= idle >> 4
+				sum -= sum >> 5
+				idle -= idle >> 5
 				for f := 0; f < 5; f++ {
 					v, err := strconv.ParseUint(fields[f+1], 10, 64)
 					if err != nil {
@@ -53,11 +62,13 @@ func checkLoad() {
 						idle += d
 					}
 				}
-				// fmt.Printf("%d - %d %v \n", sum, idle, fields)
-				if sum>>3 < idle {
+				if sum>>4 < idle {
 					break
 				}
-        /// fmt.Print(".")
+				if lastPrint > 50{
+					lastPrint=0
+					log.Println("checkLoad: not enough idle")
+				}
 				<-ticks
 			}
 		case workTickets <- 1:
