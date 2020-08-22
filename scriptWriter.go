@@ -6,6 +6,7 @@ import(
   "io"
   "log"
   "os"
+  "os/exec"
   "path"
   "path/filepath"
   "strings"
@@ -50,7 +51,7 @@ func scriptWriter(cfg *CFG) {
   if err !=nil {
     log.Fatal(err)
   }
-  defer script.Close()
+  
   
   log.Println("writing "+dest)
   str:=`
@@ -85,14 +86,14 @@ DEST=${DEST:-/}
         script.WriteString("f "+user+" "+mode+" "+entry.Hash+" "+sanitizePath(entry.Path) +"\n")
         toCacheChan <- entry
       case entry.FileInfo.Mode().IsRegular():
-        script.WriteString("e "+user+" "+mode+""+sanitizePath(entry.Path)+"\n")
+        script.WriteString("e "+user+" "+mode+" "+sanitizePath(entry.Path)+"\n")
       case entry.FileInfo.IsDir():
         script.WriteString("d "+user+" "+mode+" "+sanitizePath(entry.Path)+"\n")
       case (modeBits & os. ModeSymlink) >0:
         l,err:=os.Readlink(entry.Path)
         if err!=nil {
-          entry.record("couldn't read symlink")
-          errorWorkChan <- entry
+          // entry.record("couldn't read symlink")
+          errorWorkChan <- &Err{entry.Path,"symlink error "+err.Error(),E_ERROR}
           continue
         }
         script.WriteString("s "+user+" "+sanitizePath(entry.Path)+ " "+l+"\n")
@@ -102,6 +103,9 @@ DEST=${DEST:-/}
         script.WriteString("# couldn't deal with"+entry.Path+"\n")
     }
   }
-  script.WriteString(fmt.Sprintf("echo all done\nexit\n##### ##### #####\n%d\n",entryCnt))
+  script.WriteString(fmt.Sprintf("echo\necho all done\nexit\n##### ##### #####\n%d\n",entryCnt))
+  script.Close()
+  cmd:=exec.Command("bzip2",dest)
+  err=cmd.Run()
   log.Printf("done, entries: %d\n",entryCnt)
 }

@@ -59,11 +59,10 @@ func calcHash() {
     h,err:=calcFromFile(entry.Path)
     if err != nil {
       // sending to error channel
-      entry.record("hash failed: "+err.Error())
-      errorWorkChan <- entry
+      errorWorkChan <- &Err{entry.Path,"hash failed "+err.Error(),E_ERROR}
       continue
     }
-    entry.record("hash calc: "+h)
+    // entry.record("hash calc: "+h)
     entry.Hash=h
     checkTargetChan <- entry
   }

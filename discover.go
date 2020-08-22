@@ -95,7 +95,7 @@ func discover(f int, cfg *CFG){
     entry.FileInfo=info
     entry.MTime=info.ModTime().Unix()
     entry.Size=info.Size()      
-    entry.record("walked "+path2walk)
+    // entry.record("walked "+path2walk)
     if info.Mode().IsRegular(){
       if entry.Size > 0 {
         fromCacheChan <- entry            

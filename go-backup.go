@@ -14,8 +14,14 @@ package main
 //go:generate go run scripts/go-bin.go -o snippets.go snippets
 
 import (
+	"bufio"
+	"flag"
+	"io"
 	"log"
+	"net/smtp"
+	"os"
 	"runtime"
+	"strings"
 	"sync"
 )
 
@@ -55,6 +61,28 @@ func setup(cfg *CFG,cache *Cache){
 	// go debugSink()
 }
 
+func testMail(cfg *CFG){
+	
+  cl,err:=smtp.Dial(cfg.MailHost);  if err!=nil{log.Fatal(err)}
+  err=cl.Mail(cfg.MailFrom);  if err!=nil{log.Fatal(err)}
+  for _,rcpt:= range cfg.MailTo {
+    err=cl.Rcpt(rcpt);  if err!=nil{log.Fatal(err)}
+  }
+  wr,err:=cl.Data();  if err!=nil{log.Fatal(err)}
+ str:=`Content-type: text/html
+Subject: Test mail for backup
+ 
+Test mail
+`
+  str=strings.ReplaceAll(str,"\n","\r\n")
+  wr2:=bufio.NewWriter(wr)
+  wr2.WriteString(str)
+  wr2.Flush()
+  err=wr.Close();  if err!=nil{log.Fatal(err)}
+  err=cl.Quit();  if err!=nil{log.Fatal(err)}
+
+}
+
 // Back up files
 func main() {
 	// setting logs
@@ -62,8 +90,20 @@ func main() {
 	//
 	log.Print("go-backup started")
 	defer log.Print("all done")
+	cfgFN:=flag.String("c","go-backup.cfg","the config file to use")
+	ex:=flag.Bool("e",false,"print an example config")
+	tm:=flag.Bool("m",false,"sending a test mail")
+	flag.Parse()
+	if *ex {
+		io.Copy(os.Stdout, GetStored("snippets/go-backup.cfg"))
+		return
+	}
 	// configuration
-	cfg := GetCfg("go-backup.cfg")
+	cfg := GetCfg(*cfgFN)
+	if *tm {
+		testMail(cfg)
+		return
+	}
 	// open the bolt based cache
 	cache := OpenCache(cfg.Cache)
 	defer cache.Close()
@@ -73,4 +113,5 @@ func main() {
 	runtime.Gosched()
 	// running waits until all goroutines are finished
 	running.Wait()
+	errorMail(cfg)
 }

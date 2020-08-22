@@ -25,6 +25,9 @@ type CFG struct {
   MaxErrors int `yaml:"maxerrors"`
   MaxLoad  float64 `yaml:"maxload"`
   NumWorkers int  `yaml:"workers"`
+  MailHost string `yaml:"mailHost"`
+  MailFrom string `yaml:"mailFrom"`
+  MailTo  []string `yaml:"mailTo"`
   // walk all files that are on this device starting with this path
   Include []string `yaml:"include"`
   // list all matches that will be excluded

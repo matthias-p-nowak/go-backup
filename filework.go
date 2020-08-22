@@ -20,9 +20,11 @@ type FileWork struct {
   Size int64
   // info from the filewalk
   FileInfo os.FileInfo
-  workDone []string
+  // workDone []string
 }
 
+/*
 func (fw *FileWork) record(str string){
   fw.workDone=append(fw.workDone,str)
 }
+*/

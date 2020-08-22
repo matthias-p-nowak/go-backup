@@ -20,6 +20,8 @@ CHOWN=$(type -p chown)
 MKDIR=$(type -p mkdir)
 LN=$(type -p ln)
 MKFIFO=$(type -p mkfifo)
+RM=$(type -p rm)
+TOUCH=$(type -p touch)
 
 #if type busybox
 #then
@@ -31,30 +33,44 @@ MKFIFO=$(type -p mkfifo)
   #MKDIR="$BB mkdir"
   #LN="$BB ln"
   #MKFIFO="$BB mkfifo"
+  #RM="$BB rm"
+  #TOUCH="$BB touch"
 #fi
 
 
+OD=$(date +%s)
+
 finish(){
   FINISHED=$(( FINISHED + 1 ))
-  DONE=$(( 100 * FINISHED / TOTAL ))
-  echo -en "\r${FINISHED}/${TOTAL} = ${DONE}%"
-  LOAD=$(cat /proc/loadavg)
-  echo $LOAD
-  [[ $LOAD =~ ^0 ]] || wait -n
+	DN=$(date +%s)
+	if [ $OD != $DN ]
+	then
+		OD=$DN
+	  DONE=$(( 100 * FINISHED / TOTAL ))
+ 		echo -en "${FINISHED}/${TOTAL} = ${DONE}%\r"
+	fi
 }
 
 f(){
-  (
-    d=${DEST}/$4
-    ${BUNZIP2} <${BACKUP}/f/$3 >$d
-    ${CHMOD} $2 $d
-    ${CHOWN} $1 $d
-  ) &
+  d=${DEST}/$4
+  ${BUNZIP2} <${BACKUP}/f/$3 >$d
+  ${CHMOD} $2 $d
+  ${CHOWN} $1 $d
+  finish
+}
+
+
+e(){
+  d=${DEST}/$3
+  ${TOUCH} $d
+  ${CHMOD} $2 $d
+  ${CHOWN} $1 $d
   finish
 }
 
 s(){
   d=${DEST}/$2
+  [ -e "$d" ] && ${RM} $d
   ${LN} -s $3 $d
   ${CHOWN} -h $1 $d
   finish

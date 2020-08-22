@@ -1,0 +1,50 @@
+Content-type: text/html
+Subject: Backup error on {{ .Hostname }} at {{ .Date}}
+ 
+<html>
+  <head>
+<style>
+table {
+  border-collapse: collapse;
+  border: thin solid lightgray;
+}
+th,td {
+  border: thin solid lightgray;
+  padding: 3px;
+}
+</style>
+  </head> 
+  <body>
+    <h3>Status from backup</h3>
+    Please consider the messages:
+
+    <h4>Errors</h4>
+		
+    {{ if .Errors }} There were following errors: 
+    <table><tr><th>Path</th><th>Message</th></tr>
+    {{ range .Errors }}
+    <tr><td>{{ .Path }}</td><td>{{.Cause}}</td></tr>
+    {{ end }}
+    </table>
+    {{ else }} No errors during backup. {{ end }}
+    
+    <h4>Warnings</h4>
+
+    {{ if .Warnings }} There were following warnings: 
+    <table><tr><th>Path</th><th>Message</th></tr>
+    {{ range .Warnings }}
+    </td><td>{{ .Path }}</td><td>{{.Cause}}</td></tr>
+    {{ end }}
+    {{ else }} No warnings during backup. {{ end }}
+
+    <h4>Unknowns</h4>
+
+    {{ if .Unknowns }} There were following unknowns: 
+    <table><tr><th>Path</th><th>Message</th></tr>
+    {{ range .Unknowns }}
+    </td><td>{{ .Path }}</td><td>{{.Cause}}</td></tr>
+    {{ end }}
+    {{ else }} No unknowns during backup. {{ end }}
+    </table>
+  </body>
+</html>

@@ -36,8 +36,8 @@ func fromCache(cache *Cache){
     doHash := err == leveldb.ErrNotFound // don't know
     if (err != nil) && ! doHash {
       // there was an error, but not an empty cache
-      entry.record("Cache error:"+err.Error())
-      errorWorkChan <- entry
+      // entry.record("Cache error:"+err.Error())
+      errorWorkChan <- &Err{entry.Path,"cache error"+err.Error(),E_ERROR}
       continue
     }
     // is it the same as remembered, same size and mtime? 
@@ -46,7 +46,7 @@ func fromCache(cache *Cache){
       // TODO is it still the same file?
     if doHash {
       misses++
-      entry.record("do a hash calculation")
+      // entry.record("do a hash calculation")
       calcHashChan <- entry
     } else {
       hits++

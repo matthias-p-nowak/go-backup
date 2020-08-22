@@ -43,7 +43,7 @@ func checkTarget(cfg *CFG) {
         // this might indicate a bigger problem, therefore fatal log
         log.Fatal(err)
         }
-      entry.record("touched destination file")
+      // entry.record("touched destination file")
       scriptWriterChan <-entry
     }
   }
