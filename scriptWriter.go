@@ -8,6 +8,7 @@ import(
   "os"
   "path"
   "path/filepath"
+  "strings"
   "syscall"
   "time"
 )
@@ -16,7 +17,8 @@ import(
 var scriptWriterChan chan *FileWork=make(chan *FileWork,chanLength)
 
 func sanitizePath(f string)(r string){
-  r=f
+  r=strings.ReplaceAll(f,`"`,`\"`)
+  r=strings.ReplaceAll(r,"`","\\`")
   return
 }
 
@@ -58,7 +60,7 @@ DEST=${DEST:-/}
 `
   str=fmt.Sprintf(str,cfg.Destination)
   script.WriteString(str)
-  io.Copy(script, GetStored("restore.sh"))
+  io.Copy(script, GetStored("snippets/restore.sh"))
   entryCnt:=0
   // xx mode owner hash path
   for entry:=range scriptWriterChan {

@@ -11,6 +11,8 @@ package main
  * TODO: email when errors
  */
 
+//go:generate go run scripts/go-bin.go -o snippets.go snippets
+
 import (
 	"log"
 	"runtime"
