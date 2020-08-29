@@ -18,8 +18,11 @@ import(
 var scriptWriterChan chan *FileWork=make(chan *FileWork,chanLength)
 
 func sanitizePath(f string)(r string){
-  r=strings.ReplaceAll(f,`"`,`\"`)
-  r=strings.ReplaceAll(r,"`","\\`")
+  r=f
+  r=strings.ReplaceAll(r,`\`,`\\`)
+  r=strings.ReplaceAll(r,`"`,`\"`)
+  r=strings.ReplaceAll(r,`$`,`\$`)
+  r=`"`+strings.ReplaceAll(r,"`","\\`")+`"`
   return
 }
 

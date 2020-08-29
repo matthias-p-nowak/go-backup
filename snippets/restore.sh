@@ -23,19 +23,19 @@ MKFIFO=$(type -p mkfifo)
 RM=$(type -p rm)
 TOUCH=$(type -p touch)
 
-#if type busybox
-#then
-  #echo "using busybox"
-  #BB=$(type -p busybox)
-  #BUNZIP2="$BB bunzip2"
-  #CHMOD="$BB chmod"
-  #CHOWN="$BB chown"
-  #MKDIR="$BB mkdir"
-  #LN="$BB ln"
-  #MKFIFO="$BB mkfifo"
-  #RM="$BB rm"
-  #TOUCH="$BB touch"
-#fi
+if [ "$UseBusybox" == "yes" ]
+then
+  echo "using busybox"
+  BB=$(type -p busybox)
+  BUNZIP2="$BB bunzip2"
+  CHMOD="$BB chmod"
+  CHOWN="$BB chown"
+  MKDIR="$BB mkdir"
+  LN="$BB ln"
+  MKFIFO="$BB mkfifo"
+  RM="$BB rm"
+  TOUCH="$BB touch"
+fi
 
 
 OD=$(date +%s)
@@ -52,43 +52,51 @@ finish(){
 }
 
 f(){
-  d=${DEST}/$4
-  ${BUNZIP2} <${BACKUP}/f/$3 >$d
-  ${CHMOD} $2 $d
-  ${CHOWN} $1 $d
+  d="${DEST}/$4"
+  dd=$(dirname "$d")
+  ${MKDIR} -p "$dd"
+  ${BUNZIP2} <${BACKUP}/f/$3 >"$d"
+  ${CHMOD} $2 "$d"
+  ${CHOWN} $1 "$d"
   finish
 }
 
 
 e(){
-  d=${DEST}/$3
-  ${TOUCH} $d
-  ${CHMOD} $2 $d
-  ${CHOWN} $1 $d
+  d="${DEST}/$3"
+  dd=$(dirname "$d")
+  ${MKDIR} -p "$dd"
+  ${TOUCH} "$d"
+  ${CHMOD} $2 "$d"
+  ${CHOWN} $1 "$d"
   finish
 }
 
 s(){
-  d=${DEST}/$2
-  [ -e "$d" ] && ${RM} $d
-  ${LN} -s $3 $d
-  ${CHOWN} -h $1 $d
+  d="${DEST}/$2"
+  dd=$(dirname "$d")
+  ${MKDIR} -p "$dd"
+  [ -e "$d" ] && ${RM} "$d"
+  ${LN} -s $3 "$d"
+  ${CHOWN} -h $1 "$d"
   finish
 }
 
 d(){
-  d=${DEST}/$3
-  ${MKDIR} -p $d
-  ${CHMOD} $2 $d
-  ${CHOWN} $1 $d
+  d="${DEST}/$3"
+  ${MKDIR} -p "$d"
+  ${CHMOD} $2 "$d"
+  ${CHOWN} $1 "$d"
   finish
 }
 
 p(){
-  d=${DEST}/$3
-  ${MKFIFO} $d
-  ${CHMOD} $2 $d
-  ${CHOWN} -h $1 $d
+  d="${DEST}/$3"
+  dd=$(dirname "$d")
+  ${MKDIR} -p "$dd"
+  ${MKFIFO} "$d"
+  ${CHMOD} $2 "$d"
+  ${CHOWN} -h $1 "$d"
   finish 
 }
 
