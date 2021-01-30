@@ -1,5 +1,13 @@
 # go-backup
 
+## Caveat
+
+Backup via tape decouples the data from the reader/writer unit - whcih should be easily replaceable. Furthermore, tapes can be stored in different locations. That demands an encryption in order to secure the data. By physically removing the tapes from the library/loader/writer, one is secured against unauthorized tampering. However, using tapes requires a backup regime like full/incremental.
+
+Backup via disks allows random access to data files. Disk space is expensive, hence deduplication is advised. The disks are physically connected to the drive, hence are receptive to local disasters. Among those disaster scenarios is the ransom virus. Hence, the backed up station shouldn't have write access to already written files. Moreover, all backup files should be mirrored to another location.
+
+# Overview
+
 **Go-backup** stores the backup on a disk as a medium. 
 Content and overview are stored separately. 
 The overview is a shell script that contains both the functions and function calls. 
